@@ -6,6 +6,9 @@ WORKDIR /app
 # Copy project files
 COPY . .
 
+# Give execute permission to mvnw
+RUN chmod +x mvnw
+
 # Build jar
 RUN ./mvnw clean package -DskipTests
 
