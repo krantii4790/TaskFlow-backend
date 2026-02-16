@@ -21,7 +21,6 @@ import com.planner.service.ProgressService;
 
 @RestController
 @RequestMapping("/api/progress")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 @PreAuthorize("isAuthenticated()")
 public class ProgressController {
     

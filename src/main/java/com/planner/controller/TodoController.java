@@ -29,7 +29,6 @@ import com.planner.service.TodoService;
 
 @RestController
 @RequestMapping("/api/todos")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 @PreAuthorize("isAuthenticated()")
 public class TodoController {
 

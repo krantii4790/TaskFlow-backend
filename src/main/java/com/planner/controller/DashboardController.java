@@ -15,7 +15,6 @@ import com.planner.service.DashboardService;
 
 @RestController
 @RequestMapping("/api/dashboard")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 @PreAuthorize("isAuthenticated()")
 public class DashboardController {
     

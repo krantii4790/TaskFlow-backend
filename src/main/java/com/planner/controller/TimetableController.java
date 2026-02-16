@@ -26,7 +26,6 @@ import com.planner.service.TimetableService;
 
 @RestController
 @RequestMapping("/api/timetable")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 @PreAuthorize("isAuthenticated()")
 public class TimetableController {
     
