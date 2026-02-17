@@ -1,10 +1,12 @@
 package com.planner.controller;
 
+import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +17,7 @@ import com.planner.dto.LoginRequest;
 import com.planner.dto.RegisterRequest;
 import com.planner.exception.BadRequestException;
 import com.planner.model.User;
+import com.planner.repository.UserRepository;
 import com.planner.service.JwtTokenProvider;
 import com.planner.service.UserService;
 
@@ -32,6 +35,9 @@ public class AuthController {
     
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private UserRepository userRepository;
     
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -69,5 +75,41 @@ public class AuthController {
         response.setName(user.getName());
         
         return ResponseEntity.ok(response);
+    }
+    
+ // ✅ CHECK EMAIL
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+
+        String email = request.get("email");
+
+        Optional<User> user = userRepository.findByEmail(email);
+
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+
+        return ResponseEntity.ok("Email verified");
+    }
+
+    // ✅ RESET PASSWORD
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+
+        String email = request.get("email");
+        String newPassword = request.get("password");
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+
+        User user = optionalUser.get();
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        userRepository.save(user);
+
+        return ResponseEntity.ok("Password updated successfully");
     }
 }
