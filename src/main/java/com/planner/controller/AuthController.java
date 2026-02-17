@@ -119,13 +119,10 @@ public class AuthController {
 
         userRepository.save(user);
 
-//        emailService.sendOtpEmail(email, otp);
         System.out.println("Generated OTP: " + otp);
-
 
         return ResponseEntity.ok("OTP sent to email");
     }
-
     
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> request) {
@@ -141,22 +138,25 @@ public class AuthController {
 
         User user = optionalUser.get();
 
-        if (!user.getOtp().equals(otp)) {
+        if (user.getOtp() == null || !user.getOtp().equals(otp)) {
             return ResponseEntity.badRequest().body("Invalid OTP");
         }
 
-        if (user.getOtpexpire().isBefore(LocalDateTime.now())) {
+        if (user.getOtpexpire() == null ||
+            user.getOtpexpire().isBefore(LocalDateTime.now())) {
             return ResponseEntity.badRequest().body("OTP expired");
         }
 
         return ResponseEntity.ok("OTP verified");
     }
 
+
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
 
         String email = request.get("email");
         String newPassword = request.get("password");
+        String otp = request.get("otp");
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
 
@@ -166,6 +166,15 @@ public class AuthController {
 
         User user = optionalUser.get();
 
+        if (user.getOtp() == null || !user.getOtp().equals(otp)) {
+            return ResponseEntity.badRequest().body("Invalid OTP");
+        }
+
+        if (user.getOtpexpire() == null ||
+            user.getOtpexpire().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().body("OTP expired");
+        }
+
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setOtp(null);
         user.setOtpexpire(null);
@@ -174,5 +183,6 @@ public class AuthController {
 
         return ResponseEntity.ok("Password updated successfully");
     }
+
 
 }
