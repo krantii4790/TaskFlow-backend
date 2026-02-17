@@ -36,4 +36,8 @@ public class User {
     
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
+    
+    private String otp;
+    
+    private LocalDateTime otpexpire;
 }

@@ -1,5 +1,6 @@
 package com.planner.controller;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -18,6 +19,7 @@ import com.planner.dto.RegisterRequest;
 import com.planner.exception.BadRequestException;
 import com.planner.model.User;
 import com.planner.repository.UserRepository;
+import com.planner.service.EmailService;
 import com.planner.service.JwtTokenProvider;
 import com.planner.service.UserService;
 
@@ -38,6 +40,10 @@ public class AuthController {
     
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private EmailService emailService;
+
     
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -92,7 +98,58 @@ public class AuthController {
         return ResponseEntity.ok("Email verified");
     }
 
-    // ✅ RESET PASSWORD
+    
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> request) {
+
+        String email = request.get("email");
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+
+        User user = optionalUser.get();
+
+        String otp = String.valueOf((int)(Math.random() * 900000) + 100000);
+
+        user.setOtp(otp);
+        user.setOtpexpire(LocalDateTime.now().plusMinutes(5));
+
+        userRepository.save(user);
+
+        emailService.sendOtpEmail(email, otp);
+
+        return ResponseEntity.ok("OTP sent to email");
+    }
+
+    
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> request) {
+
+        String email = request.get("email");
+        String otp = request.get("otp");
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+
+        User user = optionalUser.get();
+
+        if (!user.getOtp().equals(otp)) {
+            return ResponseEntity.badRequest().body("Invalid OTP");
+        }
+
+        if (user.getOtpexpire().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().body("OTP expired");
+        }
+
+        return ResponseEntity.ok("OTP verified");
+    }
+
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
 
@@ -106,10 +163,14 @@ public class AuthController {
         }
 
         User user = optionalUser.get();
+
         user.setPassword(passwordEncoder.encode(newPassword));
+        user.setOtp(null);
+        user.setOtpexpire(null);
 
         userRepository.save(user);
 
         return ResponseEntity.ok("Password updated successfully");
     }
+
 }
