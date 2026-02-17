@@ -1,26 +1,37 @@
 package com.planner.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class EmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
+    @Value("${RESEND_API_KEY}")
+    private String apiKey;
 
     public void sendOtpEmail(String toEmail, String otp) {
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(toEmail);
-        message.setSubject("Daily Planner Password Reset OTP");
-        message.setText(
-                "Your OTP for password reset is: " + otp +
-                "\n\nThis OTP is valid for 5 minutes."
-        );
+        String url = "https://api.resend.com/emails";
 
-        mailSender.send(message);
+        RestTemplate restTemplate = new RestTemplate();
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("from", "onboarding@resend.dev");
+        body.put("to", toEmail);
+        body.put("subject", "Daily Planner Password Reset OTP");
+        body.put("text", "Your OTP is: " + otp + "\nValid for 5 minutes.");
+
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.set("Authorization", "Bearer " + apiKey);
+        headers.set("Content-Type", "application/json");
+
+        org.springframework.http.HttpEntity<Map<String, Object>> entity =
+                new org.springframework.http.HttpEntity<>(body, headers);
+
+        restTemplate.postForEntity(url, entity, String.class);
     }
 }
