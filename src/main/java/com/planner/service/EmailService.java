@@ -1,6 +1,7 @@
 package com.planner.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,18 +21,20 @@ public class EmailService {
         RestTemplate restTemplate = new RestTemplate();
 
         Map<String, Object> body = new HashMap<>();
-        body.put("from", "onboarding@resend.dev");
+        body.put("from", "TaskFlow <krantikumar4211@gmail.com>");
         body.put("to", toEmail);
         body.put("subject", "Daily Planner Password Reset OTP");
-        body.put("text", "Your OTP is: " + otp + "\nValid for 5 minutes.");
+        body.put("text", "Your OTP is: " + otp + "\n\nThis OTP is valid for 5 minutes.");
 
-        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + apiKey);
-        headers.set("Content-Type", "application/json");
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        org.springframework.http.HttpEntity<Map<String, Object>> entity =
-                new org.springframework.http.HttpEntity<>(body, headers);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
-        restTemplate.postForEntity(url, entity, String.class);
+        ResponseEntity<String> response =
+                restTemplate.postForEntity(url, entity, String.class);
+
+        System.out.println("Resend response: " + response.getBody());
     }
 }
