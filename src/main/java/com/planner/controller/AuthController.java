@@ -119,7 +119,9 @@ public class AuthController {
 
         userRepository.save(user);
 
-        System.out.println("Generated OTP: " + otp);
+        emailService.sendOtpEmail(email, otp);
+        
+        System.out.println("OTP sent to: " + email);
 
         return ResponseEntity.ok("OTP sent to email");
     }

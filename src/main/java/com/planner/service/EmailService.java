@@ -11,14 +11,16 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    public void sendOtpEmail(String to, String otp) {
+    public void sendOtpEmail(String toEmail, String otp) {
 
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject("Password Reset OTP");
-        message.setText("Your OTP for password reset is: " + otp);
+        message.setTo(toEmail);
+        message.setSubject("Daily Planner Password Reset OTP");
+        message.setText(
+                "Your OTP for password reset is: " + otp +
+                "\n\nThis OTP is valid for 5 minutes."
+        );
 
         mailSender.send(message);
     }
 }
-
