@@ -149,16 +149,18 @@ public class AuthController {
             return ResponseEntity.badRequest().body("OTP expired");
         }
 
+        // ✅ MARK OTP VERIFIED
+        user.setOtp("VERIFIED");
+        userRepository.save(user);
+
         return ResponseEntity.ok("OTP verified");
     }
-
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
 
         String email = request.get("email");
         String newPassword = request.get("password");
-        String otp = request.get("otp");
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
 
@@ -168,13 +170,8 @@ public class AuthController {
 
         User user = optionalUser.get();
 
-        if (user.getOtp() == null || !user.getOtp().equals(otp)) {
-            return ResponseEntity.badRequest().body("Invalid OTP");
-        }
-
-        if (user.getOtpexpire() == null ||
-            user.getOtpexpire().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.badRequest().body("OTP expired");
+        if (!"VERIFIED".equals(user.getOtp())) {
+            return ResponseEntity.badRequest().body("OTP not verified");
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));

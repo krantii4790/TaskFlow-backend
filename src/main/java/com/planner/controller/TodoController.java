@@ -27,6 +27,10 @@ import com.planner.model.enums.TodoStatus;
 import com.planner.service.ProgressService;
 import com.planner.service.TodoService;
 
+import com.planner.model.User;
+import com.planner.repository.UserRepository;
+import com.planner.service.UserService;
+
 @RestController
 @RequestMapping("/api/todos")
 @PreAuthorize("isAuthenticated()")
@@ -37,6 +41,12 @@ public class TodoController {
 
     @Autowired
     private ProgressService progressService;
+    
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
 
     // ---------------- GET TODOS BY DATE ----------------
     @GetMapping
@@ -80,6 +90,13 @@ public class TodoController {
                 request.getUserId(),
                 request.getDate()
         );
+
+        // ✅ UPDATE STREAK
+        User user = userRepository.findById(request.getUserId()).orElse(null);
+        if (user != null) {
+            userService.updateStreak(user);
+            userRepository.save(user);
+        }
 
         return new ResponseEntity<>(convertToDTO(todo), HttpStatus.CREATED);
     }

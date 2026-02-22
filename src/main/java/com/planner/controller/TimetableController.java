@@ -24,6 +24,10 @@ import com.planner.dto.TimetableRequest;
 import com.planner.model.Timetable;
 import com.planner.service.TimetableService;
 
+import com.planner.model.User;
+import com.planner.repository.UserRepository;
+import com.planner.service.UserService;
+
 @RestController
 @RequestMapping("/api/timetable")
 @PreAuthorize("isAuthenticated()")
@@ -31,6 +35,12 @@ public class TimetableController {
     
     @Autowired
     private TimetableService timetableService;
+    
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
     
     @GetMapping
     public ResponseEntity<List<TimetableDTO>> getTimetable(
@@ -70,6 +80,13 @@ public class TimetableController {
                 request.getStartTime(),
                 request.getEndTime()
         );
+
+        // ✅ UPDATE STREAK
+        User user = userRepository.findById(request.getUserId()).orElse(null);
+        if (user != null) {
+            userService.updateStreak(user);
+            userRepository.save(user);
+        }
 
         return new ResponseEntity<>(convertToDTO(timetable), HttpStatus.CREATED);
     }

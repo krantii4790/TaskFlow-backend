@@ -5,31 +5,45 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.planner.model.User;
+import com.planner.repository.UserRepository;
 import com.planner.service.DashboardService;
 
 @RestController
 @RequestMapping("/api/dashboard")
 @PreAuthorize("isAuthenticated()")
 public class DashboardController {
-    
+
     @Autowired
     private DashboardService dashboardService;
-    
+
+    @Autowired
+    private UserRepository userRepository;
+
+    // ✅ SUMMARY
     @GetMapping("/summary")
     public ResponseEntity<Map<String, Object>> getSummary(@RequestParam Long userId) {
+
         Map<String, Object> summary = dashboardService.getDashboardSummary(userId);
+
+        User user = userRepository.findById(userId).orElse(null);
+
+        summary.put("streak", user != null ? user.getStreak() : 0);
+
         return ResponseEntity.ok(summary);
     }
-    
+
+    // ✅ WEEKLY (no streak needed here)
     @GetMapping("/weekly")
     public ResponseEntity<Map<String, Object>> getWeeklyStats(@RequestParam Long userId) {
+
         Map<String, Object> stats = dashboardService.getWeeklyStats(userId);
+
         return ResponseEntity.ok(stats);
     }
 }

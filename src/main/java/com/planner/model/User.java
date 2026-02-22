@@ -1,5 +1,6 @@
 package com.planner.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -40,4 +41,9 @@ public class User {
     private String otp;
     
     private LocalDateTime otpexpire;
+    
+    private int streak = 0;
+    
+    private LocalDate lastActivityDate;
+    
 }

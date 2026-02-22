@@ -1,5 +1,6 @@
 package com.planner.service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,5 +37,30 @@ public class UserService {
     
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    public void updateStreak(User user) {
+
+        LocalDate today = LocalDate.now();
+
+        if (user.getLastActivityDate() == null) {
+            user.setStreak(1);
+        } else {
+
+            LocalDate lastDate = user.getLastActivityDate();
+
+            if (lastDate.equals(today)) {
+                // already counted today
+                return;
+            }
+
+            if (lastDate.equals(today.minusDays(1))) {
+                user.setStreak(user.getStreak() + 1);
+            } else {
+                user.setStreak(1);
+            }
+        }
+
+        user.setLastActivityDate(today);
     }
 }
