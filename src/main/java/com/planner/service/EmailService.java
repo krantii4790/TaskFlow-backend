@@ -21,7 +21,7 @@ public class EmailService {
         RestTemplate restTemplate = new RestTemplate();
 
         Map<String, Object> body = new HashMap<>();
-        body.put("from", "TaskFlow <krantikumar4211@gmail.com>");
+        body.put("from", "TaskFlow <onboarding@resend.dev>");
         body.put("to", toEmail);
         body.put("subject", "Daily Planner Password Reset OTP");
         body.put("text", "Your OTP is: " + otp + "\n\nThis OTP is valid for 5 minutes.");
@@ -32,9 +32,15 @@ public class EmailService {
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<String> response =
-                restTemplate.postForEntity(url, entity, String.class);
+        try {
+            ResponseEntity<String> response =
+                    restTemplate.postForEntity(url, entity, String.class);
 
-        System.out.println("Resend response: " + response.getBody());
+            System.out.println("Resend response: " + response.getBody());
+
+        } catch (Exception e) {
+            System.out.println("Email sending failed: " + e.getMessage());
+            throw new RuntimeException("Failed to send OTP email");
+        }
     }
 }
