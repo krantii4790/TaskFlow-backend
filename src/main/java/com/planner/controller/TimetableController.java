@@ -84,8 +84,8 @@ public class TimetableController {
         // ✅ UPDATE STREAK
         User user = userRepository.findById(request.getUserId()).orElse(null);
         if (user != null) {
-            userService.updateStreak(user);
-            userRepository.save(user);
+        	userService.updateStreak(user, request.getDate());
+        	userRepository.save(user);
         }
 
         return new ResponseEntity<>(convertToDTO(timetable), HttpStatus.CREATED);

@@ -39,9 +39,7 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
-    public void updateStreak(User user) {
-
-        LocalDate today = LocalDate.now();
+    public void updateStreak(User user, LocalDate activityDate) {
 
         if (user.getLastActivityDate() == null) {
             user.setStreak(1);
@@ -49,18 +47,18 @@ public class UserService {
 
             LocalDate lastDate = user.getLastActivityDate();
 
-            if (lastDate.equals(today)) {
-                // already counted today
+            if (lastDate.equals(activityDate)) {
+                // Already counted for this date
                 return;
             }
 
-            if (lastDate.equals(today.minusDays(1))) {
+            if (lastDate.equals(activityDate.minusDays(1))) {
                 user.setStreak(user.getStreak() + 1);
             } else {
                 user.setStreak(1);
             }
         }
 
-        user.setLastActivityDate(today);
+        user.setLastActivityDate(activityDate);
     }
 }

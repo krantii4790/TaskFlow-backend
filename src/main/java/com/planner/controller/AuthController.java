@@ -149,7 +149,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("OTP expired");
         }
 
-        // ✅ MARK OTP VERIFIED
+        // ✅ MARK VERIFIED
         user.setOtp("VERIFIED");
         userRepository.save(user);
 
@@ -170,6 +170,7 @@ public class AuthController {
 
         User user = optionalUser.get();
 
+        // ✅ CHECK IF OTP WAS VERIFIED
         if (!"VERIFIED".equals(user.getOtp())) {
             return ResponseEntity.badRequest().body("OTP not verified");
         }
