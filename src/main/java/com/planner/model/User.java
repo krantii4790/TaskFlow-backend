@@ -39,8 +39,10 @@ public class User {
     private LocalDateTime updatedAt = LocalDateTime.now();
     
     private String otp;
-    
+
     private LocalDateTime otpexpire;
+
+    private Boolean otpVerified = false;
     
     private int streak = 0;
     
