@@ -127,64 +127,66 @@ public class AuthController {
     }
     
     @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> request) {
+public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> request) {
 
-        String email = request.get("email");
-        String otp = request.get("otp");
+    String email = request.get("email");
+    String otp = request.get("otp");
 
-        Optional<User> optionalUser = userRepository.findByEmail(email);
+    Optional<User> optionalUser = userRepository.findByEmail(email);
 
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found");
-        }
-
-        User user = optionalUser.get();
-
-        if (user.getOtp() == null || !user.getOtp().equals(otp)) {
-            return ResponseEntity.badRequest().body("Invalid OTP");
-        }
-
-        if (user.getOtpexpire() == null ||
-            user.getOtpexpire().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.badRequest().body("OTP expired");
-        }
-
-        return ResponseEntity.ok("OTP verified");
+    if (optionalUser.isEmpty()) {
+        return ResponseEntity.badRequest().body("User not found");
     }
 
+    User user = optionalUser.get();
 
-    @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
-
-        String email = request.get("email");
-        String newPassword = request.get("password");
-        String otp = request.get("otp");
-
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found");
-        }
-
-        User user = optionalUser.get();
-
-        if (user.getOtp() == null || !user.getOtp().equals(otp)) {
-            return ResponseEntity.badRequest().body("Invalid OTP");
-        }
-
-        if (user.getOtpexpire() == null ||
-            user.getOtpexpire().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.badRequest().body("OTP expired");
-        }
-
-        user.setPassword(passwordEncoder.encode(newPassword));
-        user.setOtp(null);
-        user.setOtpexpire(null);
-
-        userRepository.save(user);
-
-        return ResponseEntity.ok("Password updated successfully");
+    if (user.getOtp() == null || !user.getOtp().equals(otp)) {
+        return ResponseEntity.badRequest().body("Invalid OTP");
     }
+
+    if (user.getOtpexpire() == null ||
+        user.getOtpexpire().isBefore(LocalDateTime.now())) {
+        return ResponseEntity.badRequest().body("OTP expired");
+    }
+
+    // ✅ VERY IMPORTANT
+    user.setOtpVerified(true);
+    userRepository.save(user);
+
+    return ResponseEntity.ok("OTP verified");
+}
+
+
+   @PostMapping("/reset-password")
+public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+
+    String email = request.get("email");
+    String newPassword = request.get("password");
+
+    Optional<User> optionalUser = userRepository.findByEmail(email);
+
+    if (optionalUser.isEmpty()) {
+        return ResponseEntity.badRequest().body("User not found");
+    }
+
+    User user = optionalUser.get();
+
+    // ✅ Only check if OTP was verified
+    if (!user.isOtpVerified()) {
+        return ResponseEntity.badRequest().body("OTP not verified");
+    }
+
+    user.setPassword(passwordEncoder.encode(newPassword));
+
+    // ✅ Clear OTP data after reset
+    user.setOtp(null);
+    user.setOtpexpire(null);
+    user.setOtpVerified(false);
+
+    userRepository.save(user);
+
+    return ResponseEntity.ok("Password updated successfully");
+}
 
 
 }
