@@ -34,14 +34,19 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "otp")
     private String otp;
 
+    @Column(name = "otpexpire")
     private LocalDateTime otpexpire;
 
+    @Column(name = "otp_verified")
     private boolean otpVerified = false;
 
+    @Column(name = "streak")
     private int streak = 0;
 
+    @Column(name = "last_activity_date")
     private LocalDate lastActivityDate;
 
     @PrePersist
