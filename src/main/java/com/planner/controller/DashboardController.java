@@ -17,26 +17,19 @@ import com.planner.service.DashboardService;
 @RequestMapping("/api/dashboard")
 @PreAuthorize("isAuthenticated()")
 public class DashboardController {
-
+    
     @Autowired
     private DashboardService dashboardService;
-
+    
     @GetMapping("/summary")
     public ResponseEntity<Map<String, Object>> getSummary(@RequestParam Long userId) {
         Map<String, Object> summary = dashboardService.getDashboardSummary(userId);
         return ResponseEntity.ok(summary);
     }
-
+    
     @GetMapping("/weekly")
     public ResponseEntity<Map<String, Object>> getWeeklyStats(@RequestParam Long userId) {
         Map<String, Object> stats = dashboardService.getWeeklyStats(userId);
-        return ResponseEntity.ok(stats);
-    }
-
-    // ✅ ADDED: Missing monthly endpoint that frontend now calls
-    @GetMapping("/monthly")
-    public ResponseEntity<Map<String, Object>> getMonthlyStats(@RequestParam Long userId) {
-        Map<String, Object> stats = dashboardService.getMonthlyStats(userId);
         return ResponseEntity.ok(stats);
     }
 }
